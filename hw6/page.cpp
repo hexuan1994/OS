@@ -4,7 +4,7 @@
 
 using namespace std;
 
-char mem[0x80*0x20];
+int mem[0x80*0x20];
 int baseAddr = 0x0;
 
 
@@ -19,11 +19,14 @@ int loadMem(char* filename){
 
 		if(fscanf(fp,"page %x:",&i) == EOF)
 			break;
-		char temp = '\0';
+		int temp = 0;
 		for(j = 0;j < 0x20;j++){
 			fscanf(fp,"%x",&temp);
 			mem[i*0x20 + j] = temp;
+			printf("%x ",temp);
 		}
+		fscanf(fp,"\n");
+		printf("\n");
 	}
 	return 1;
 }
@@ -41,7 +44,7 @@ void map(int logicAddr){
 	}
 
 	int pte_index = logicAddr >> 5 & 0x1f;
-	int pte_contents = mem[pde_pfn << 5 + pte_index];
+	int pte_contents = mem[pde_pfn << 5 | pte_index];
 	int pte_valid = pte_contents >> 7 & 0x1;
 	int pte_pfn = pte_contents & 0x7f;
 	printf("    --> pte index:0x%02x  pte contents:(valid %d, pfn 0x%02x)\n", pte_index, pte_valid, pte_pfn);
@@ -61,6 +64,8 @@ int main(int argc,char* argv[]){
 	sscanf(argv[2],"%x",&baseAddr);
 	if(loadMem(filename) == -1)
 		return 0 ;
+	for(int k = 0;k < 64;k++)
+		printf("%x ",mem[k]);
 	while(true){
 		printf("LogicAddr: \n");
 		int addr = 0;
